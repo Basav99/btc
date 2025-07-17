@@ -1,0 +1,8 @@
+{
+  "canisters": {
+    "btc2x_vault": {
+      "main": "src/btc2x_vault/main.mo",
+      "type": "motoko"
+    }
+  }
+}
