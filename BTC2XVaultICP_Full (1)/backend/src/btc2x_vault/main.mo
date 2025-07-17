@@ -3,46 +3,44 @@ import Nat "mo:base/Nat";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 import Trie "mo:base/Trie";
+import Types "./types"; // Import from types.mo
 
 actor BTCAcceleratorVault {
 
-  type Epoch = {
-    start: Int;
-    end: Int;
-    yieldRate: Nat; // e.g., 2% = 2
-  };
-
   stable var totalDeposits : Nat = 0;
   stable var balances : Trie.Trie<Principal, Nat> = Trie.empty();
-  stable var epoch: Epoch = {
+
+  stable var epoch: Types.Epoch = {
     start = Time.now();
     end = Time.now() + 7 * 24 * 60 * 60 * 1_000_000_000; // 1 week
     yieldRate = 2; // default 2% yield per epoch
   };
 
-  public func deposit(amount : Nat) : async Text {
+  public func deposit(amount : Nat) : async Types.DepositResult {
     let caller = Principal.fromActor(this);
     balances := Trie.put(balances, caller, amount, func(a, b) = a + b);
     totalDeposits += amount;
     Debug.print("Deposited " # Nat.toText(amount));
-    return "Deposit successful.";
+    return #ok("Deposit successful.");
   };
 
-  public func withdraw() : async Text {
+  public func withdraw() : async Types.WithdrawalResult {
     let caller = Principal.fromActor(this);
     let currentTime = Time.now();
     if (currentTime < epoch.end) {
-      return "Epoch not yet complete. Withdrawal not allowed.";
+      return #err("Epoch not yet complete. Withdrawal not allowed.");
     };
 
     switch (Trie.get(balances, caller)) {
-      case (null) { return "No balance found."; };
+      case (null) {
+        return #err("No balance found.");
+      };
       case (?bal) {
         let yieldEarned = (bal * epoch.yieldRate) / 100;
         let total = bal + yieldEarned;
         totalDeposits -= bal;
         balances := Trie.put(balances, caller, 0, func(_, _) = 0);
-        return "Withdrawn: " # Nat.toText(total) # " (including " # Nat.toText(yieldEarned) # " yield)";
+        return #ok({ amount = total; yield = yieldEarned });
       };
     };
   };
@@ -58,7 +56,7 @@ actor BTCAcceleratorVault {
     return totalDeposits;
   };
 
-  public query func getEpochInfo() : async Epoch {
+  public query func getEpochInfo() : async Types.Epoch {
     return epoch;
   };
 
