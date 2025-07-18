@@ -1,8 +1,28 @@
 {
+  "version": 1,
   "canisters": {
     "btc2x_vault": {
+      "type": "motoko",
       "main": "src/btc2x_vault/main.mo",
-      "type": "motoko"
+      "candid": "src/btc2x_vault/main.did",
+      "dependencies": []
+    }
+  },
+  "defaults": {
+    "build": {
+      "output": "wasm"
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8000",
+      "type": "ephemeral"
+    },
+    "ic": {
+      "providers": [
+        "https://ic0.app"
+      ],
+      "type": "persistent"
     }
   }
 }
