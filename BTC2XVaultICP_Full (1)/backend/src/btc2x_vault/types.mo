@@ -1,8 +1,14 @@
 module {
   public type Epoch = {
-    start: Int;
-    end: Int;
+    start: Time.Time;
+    end: Time.Time;
     yieldRate: Nat;
+  };
+
+  public type EpochRecord = {
+    epoch: Epoch;
+    totalDeposits: Nat;
+    notes: ?Text;
   };
 
   public type DepositResult = {
@@ -11,7 +17,10 @@ module {
   };
 
   public type WithdrawalResult = {
-    #ok: { amount: Nat; yield: Nat };
+    #ok: {
+      amount: Nat;
+      yield: Nat;
+    };
     #err: Text;
   };
-}
+};
