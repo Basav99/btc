@@ -17,7 +17,7 @@ actor BTCAcceleratorVault {
     yieldRate = 2;
   };
 
-  stable var epochHistory: [Types.Epoch] = [];
+  stable var epochHistory: [Types.EpochRecord] = [];
 
   public func deposit(amount : Nat) : async Types.DepositResult {
     let caller = Principal.fromActor(this);
@@ -65,8 +65,13 @@ actor BTCAcceleratorVault {
   };
 
   public func startNewEpoch(yieldRate: Nat) : async Text {
-    // Push current epoch to history before resetting
-    epochHistory := Array.append(epochHistory, [epoch]);
+    // Push current epoch into history with total deposits snapshot
+    let snapshot: Types.EpochRecord = {
+      epoch = epoch;
+      totalDeposits = totalDeposits;
+      notes = null;
+    };
+    epochHistory := Array.append(epochHistory, [snapshot]);
 
     epoch := {
       start = Time.now();
@@ -76,7 +81,7 @@ actor BTCAcceleratorVault {
     return "New epoch started with yield rate " # Nat.toText(yieldRate) # "%.";
   };
 
-  public query func getEpochHistory() : async [Types.Epoch] {
+  public query func getEpochHistory() : async [Types.EpochRecord] {
     return epochHistory;
   };
 
