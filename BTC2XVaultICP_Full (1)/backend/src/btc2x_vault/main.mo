@@ -3,7 +3,8 @@ import Nat "mo:base/Nat";
 import Principal "mo:base/Principal";
 import Time "mo:base/Time";
 import Trie "mo:base/Trie";
-import Types "./types"; // Import from types.mo
+import Array "mo:base/Array";
+import Types "./types";
 
 actor BTCAcceleratorVault {
 
@@ -12,9 +13,11 @@ actor BTCAcceleratorVault {
 
   stable var epoch: Types.Epoch = {
     start = Time.now();
-    end = Time.now() + 7 * 24 * 60 * 60 * 1_000_000_000; // 1 week
-    yieldRate = 2; // default 2% yield per epoch
+    end = Time.now() + 7 * 24 * 60 * 60 * 1_000_000_000;
+    yieldRate = 2;
   };
+
+  stable var epochHistory: [Types.Epoch] = [];
 
   public func deposit(amount : Nat) : async Types.DepositResult {
     let caller = Principal.fromActor(this);
@@ -27,19 +30,20 @@ actor BTCAcceleratorVault {
   public func withdraw() : async Types.WithdrawalResult {
     let caller = Principal.fromActor(this);
     let currentTime = Time.now();
+
     if (currentTime < epoch.end) {
-      return #err("Epoch not yet complete. Withdrawal not allowed.");
+      return #err("Epoch not yet complete.");
     };
 
     switch (Trie.get(balances, caller)) {
       case (null) {
-        return #err("No balance found.");
+        return #err("No balance.");
       };
       case (?bal) {
         let yieldEarned = (bal * epoch.yieldRate) / 100;
         let total = bal + yieldEarned;
-        totalDeposits -= bal;
         balances := Trie.put(balances, caller, 0, func(_, _) = 0);
+        totalDeposits -= bal;
         return #ok({ amount = total; yield = yieldEarned });
       };
     };
@@ -61,12 +65,19 @@ actor BTCAcceleratorVault {
   };
 
   public func startNewEpoch(yieldRate: Nat) : async Text {
+    // Push current epoch to history before resetting
+    epochHistory := Array.append(epochHistory, [epoch]);
+
     epoch := {
       start = Time.now();
       end = Time.now() + 7 * 24 * 60 * 60 * 1_000_000_000;
       yieldRate = yieldRate;
     };
     return "New epoch started with yield rate " # Nat.toText(yieldRate) # "%.";
+  };
+
+  public query func getEpochHistory() : async [Types.Epoch] {
+    return epochHistory;
   };
 
 };
