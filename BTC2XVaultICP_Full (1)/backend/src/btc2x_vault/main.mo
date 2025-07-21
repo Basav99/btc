@@ -65,7 +65,6 @@ actor BTCAcceleratorVault {
   };
 
   public func startNewEpoch(yieldRate: Nat) : async Text {
-    // Push current epoch into history with total deposits snapshot
     let snapshot: Types.EpochRecord = {
       epoch = epoch;
       totalDeposits = totalDeposits;
@@ -84,5 +83,4 @@ actor BTCAcceleratorVault {
   public query func getEpochHistory() : async [Types.EpochRecord] {
     return epochHistory;
   };
-
 };
