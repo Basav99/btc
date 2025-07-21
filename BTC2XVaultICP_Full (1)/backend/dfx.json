@@ -1,11 +1,8 @@
 {
-  "version": 1,
   "canisters": {
     "btc2x_vault": {
-      "type": "motoko",
       "main": "src/btc2x_vault/main.mo",
-      "candid": "src/btc2x_vault/main.did",
-      "dependencies": []
+      "type": "motoko"
     }
   },
   "defaults": {
@@ -19,10 +16,9 @@
       "type": "ephemeral"
     },
     "ic": {
-      "providers": [
-        "https://ic0.app"
-      ],
-      "type": "persistent"
+      "type": "persistent",
+      "providers": ["https://ic0.app"]
     }
-  }
+  },
+  "version": 1
 }
