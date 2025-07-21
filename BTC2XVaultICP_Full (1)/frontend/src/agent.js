@@ -1,5 +1,5 @@
 import { HttpAgent, Actor } from "@dfinity/agent";
-import { idlFactory } from "../../../.dfx/ic/canisters/btc2x_vault"; // adjust if needed
+import { idlFactory } from "../../../.dfx/ic/canisters/btc2x_vault";
 import { canisterId } from "../../../.dfx/ic/canisters/btc2x_vault";
 
 export async function getVaultActor() {
