@@ -1,16 +1,13 @@
-export async function connectPlugWallet() {
+export const connectPlugWallet = async () => {
   if (!window.ic || !window.ic.plug) {
-    throw new Error("Plug Wallet not found. Please install the Plug extension.");
+    throw new Error("Plug Wallet not available");
   }
 
   const isConnected = await window.ic.plug.isConnected();
   if (!isConnected) {
-    const connection = await window.ic.plug.requestConnect();
-    if (!connection) {
-      throw new Error("User rejected connection to Plug Wallet.");
-    }
+    await window.ic.plug.requestConnect();
   }
 
   const principal = await window.ic.plug.getPrincipal();
   return principal.toText();
-}
+};
